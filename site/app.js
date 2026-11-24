@@ -64,6 +64,43 @@
   function latestRows() { return state.rows.filter((row) => row.date === state.latestDate); }
   function sourceRows() { return state.status.sources || []; }
 
+  function renderTickerStrip() {
+    const target = $("#ticker-strip");
+    if (!target) return;
+    target.innerHTML = latestRows().map((row) => `<div class="ticker-chip"><strong>${esc(row.item_id.toUpperCase())}</strong><small>$${number(row.close_usd)}</small><span class="${changeClass(row.change_pct)}">${pct(row.change_pct)}</span></div>`).join("") || '<span class="ticker-loading">No latest quotes are available.</span>';
+  }
+
+  function renderMarketPulse() {
+    const target = $("#market-pulse-chart");
+    if (!target) return;
+    const dates = [...new Set(state.rows.map((row) => row.date))].sort();
+    const pulse = dates.map((date) => {
+      const rows = state.rows.filter((row) => row.date === date && row.change_pct !== "");
+      const values = rows.map((row) => Number(row.change_pct));
+      return { date, average: values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0, up: values.filter((value) => value > 0).length, down: values.filter((value) => value < 0).length };
+    });
+    if (!pulse.length) { target.innerHTML = '<div class="chart-empty">No history is available yet.</div>'; return; }
+    const width = 920, height = 205, pad = { left: 44, right: 20, top: 18, bottom: 32 };
+    const values = pulse.map((point) => point.average);
+    let min = Math.min(...values, 0), max = Math.max(...values, 0);
+    if (min === max) { min -= 1; max += 1; }
+    const x = (index) => pad.left + (index / Math.max(1, pulse.length - 1)) * (width - pad.left - pad.right);
+    const y = (value) => pad.top + ((max - value) / (max - min)) * (height - pad.top - pad.bottom);
+    const line = pulse.map((point, index) => `${index ? "L" : "M"}${x(index).toFixed(1)},${y(point.average).toFixed(1)}`).join(" ");
+    const area = `${line} L${x(pulse.length - 1).toFixed(1)},${height - pad.bottom} L${x(0).toFixed(1)},${height - pad.bottom} Z`;
+    const zeroY = y(0);
+    const points = pulse.map((point, index) => `<circle cx="${x(index).toFixed(1)}" cy="${y(point.average).toFixed(1)}" r="${index === pulse.length - 1 ? 5 : 3}" fill="${point.average >= 0 ? "#4fe0a1" : "#ff7f8e"}" stroke="#07111f" stroke-width="2"/>`).join("");
+    const labels = pulse.length === 1 ? `<text x="${x(0)}" y="${height - 9}" fill="#647692" font-size="10" text-anchor="middle">${esc(pulse[0].date)}</text>` : `<text x="${x(0)}" y="${height - 9}" fill="#647692" font-size="10">${esc(pulse[0].date)}</text><text x="${x(pulse.length - 1)}" y="${height - 9}" fill="#647692" font-size="10" text-anchor="end">${esc(pulse.at(-1).date)}</text>`;
+    target.innerHTML = `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Average daily market move over time"><line x1="${pad.left}" x2="${width - pad.right}" y1="${zeroY}" y2="${zeroY}" stroke="rgba(157,183,220,.32)" stroke-dasharray="4 5"/><path d="${area}" fill="rgba(79,224,161,.12)"/><path d="${line}" fill="none" stroke="#4fe0a1" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>${points}${labels}<text x="${pad.left - 7}" y="${pad.top + 4}" fill="#647692" font-size="10" text-anchor="end">${max.toFixed(2)}%</text><text x="${pad.left - 7}" y="${height - pad.bottom + 4}" fill="#647692" font-size="10" text-anchor="end">${min.toFixed(2)}%</text></svg>`;
+    const latest = pulse.at(-1);
+    const breadth = $("#pulse-breadth");
+    const average = $("#pulse-average");
+    if (breadth) { breadth.textContent = `${latest.up} up / ${latest.down} down`; breadth.className = latest.up >= latest.down ? "positive" : "negative"; }
+    if (average) { average.textContent = `Average ${pct(latest.average)}`; average.className = changeClass(latest.average); }
+    const caption = $("#market-pulse-caption");
+    if (caption) caption.textContent = `Average daily percentage move across ${latest.up + latest.down} tracked items · ${latest.date}`;
+  }
+
   function renderSources() {
     const target = $("#source-list");
     if (!target) return;
@@ -81,6 +118,8 @@
     $("#gone-count").textContent = integer(status.gone_today);
     $("#source-count").textContent = `${sourceRows().filter((source) => source.ok).length}/${sourceRows().length || 0}`;
     renderSources();
+    renderTickerStrip();
+    renderMarketPulse();
     const rows = latestRows();
     $("#latest-values").innerHTML = rows.map((row) => `<tr><td class="item-cell"><strong>${esc(row.item)}</strong><small>${esc(row.category)} · ${esc(row.item_id)}</small></td><td>${esc(row.source)}</td><td class="big-number">$${number(row.close_usd)}</td><td class="${changeClass(row.change_pct)} big-number">${pct(row.change_pct)}</td><td>${integer(row.volume)}</td></tr>`).join("") || '<tr><td class="empty" colspan="5">No market snapshot loaded yet.</td></tr>';
     const moves = [...rows].filter((row) => row.change_pct !== "").sort((a, b) => Math.abs(Number(b.change_pct)) - Math.abs(Number(a.change_pct))).slice(0, 5);

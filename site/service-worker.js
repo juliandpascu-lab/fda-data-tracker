@@ -1,4 +1,4 @@
-const CACHE = "market-ledger-v1";
+const CACHE = "market-ledger-v2";
 const APP_SHELL = ["./", "index.html", "browse.html", "trends.html", "styles.css", "app.js", "trends.js", "manifest.webmanifest", "icon.svg", "data/history.csv", "data/status.json"];
 
 self.addEventListener("install", (event) => {

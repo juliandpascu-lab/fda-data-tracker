@@ -24,11 +24,22 @@
       </div>
       <div class="hero-meta"><span>Last successful run</span><strong id="last-run">Loading…</strong><small>Snapshot date: <span id="run-date">—</span></small></div>
     </section>
+    <section class="ticker-band" aria-label="Market ticker">
+      <div class="ticker-label"><span class="live-dot"></span> Market watch</div>
+      <div class="ticker-track" id="ticker-strip"><span class="ticker-loading">Loading latest quotes…</span></div>
+    </section>
     <section class="stat-grid" aria-label="Tracker summary">
       <article class="stat"><span class="stat-label">Days watched</span><strong class="stat-value" id="days-with-success">—</strong><span class="stat-note">successful collection dates</span></article>
       <article class="stat"><span class="stat-label">Latest items</span><strong class="stat-value" id="item-count">—</strong><span class="stat-note">tracked in the current snapshot</span></article>
       <article class="stat"><span class="stat-label">New today</span><strong class="stat-value" id="new-count">—</strong><span class="stat-note">items appearing in the latest run</span></article>
       <article class="stat"><span class="stat-label">Gone today</span><strong class="stat-value" id="gone-count">—</strong><span class="stat-note">items missing after a source return</span></article>
+    </section>
+    <section class="panel pulse-panel">
+      <div class="panel-head">
+        <div><h2>Market pulse</h2><p id="market-pulse-caption">Daily breadth across every tracked item.</p></div>
+        <div class="pulse-signal"><span>Latest breadth</span><strong id="pulse-breadth">—</strong><small id="pulse-average">—</small></div>
+      </div>
+      <div class="panel-body pulse-body"><div class="chart-shell"><div class="chart-grid-lines"><i></i><i></i><i></i></div><div id="market-pulse-chart" class="pulse-chart"><div class="chart-empty">Loading market pulse…</div></div></div><div class="pulse-legend"><span><i class="legend-line"></i> average daily move</span><span><i class="legend-dot up"></i> positive breadth</span><span><i class="legend-dot down"></i> negative breadth</span></div></div>
     </section>
     <section class="two-col">
       <article class="panel">

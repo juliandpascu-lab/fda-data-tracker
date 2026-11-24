@@ -1,0 +1,11 @@
+date,item_id,item,source,category,close_usd,change_pct,volume
+2026-11-24,apple,Apple,yahoo_finance_chart,Stock,352.63501,1.018398,21115248.0
+2026-11-24,bitcoin,Bitcoin,yahoo_finance_chart,Crypto,59827.078125,-2.260879,34362617856.0
+2026-11-24,ethereum,Ethereum,yahoo_finance_chart,Crypto,1676.819946,-1.874439,12356869120.0
+2026-11-24,hartford_schroders,Hartford Schroders International Stock Fund Class A,yahoo_finance_chart,Fund,22.85,3.02074,0.0
+2026-11-24,jpmorgan,JPMorgan Chase,yahoo_finance_chart,Stock,316.860687,0.063375,3386739.0
+2026-11-24,nvidia,NVIDIA,yahoo_finance_chart,Stock,153.362198,-7.081372,279771476.0
+2026-11-24,palantir,Palantir,yahoo_finance_chart,Stock,161.994995,1.653486,12835221.0
+2026-11-24,q2,Q2 Holdings,yahoo_finance_chart,Stock,67.879997,1.983173,153825.0
+2026-11-24,sp500,S&P 500,yahoo_finance_chart,Index,7203.319824,-0.467726,1863148000.0
+2026-11-24,vanguard_morningstar,Vanguard Morningstar Total Stock Market Index Fund,yahoo_finance_chart,Fund,172.899994,4.572395,0.0

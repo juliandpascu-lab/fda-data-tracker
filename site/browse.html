@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07111f">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <title>Market Ledger · Browse</title>
+</head>
+<body>
+  <nav class="nav" aria-label="Primary navigation">
+    <a class="brand" href="index.html"><span class="brand-mark">↗</span><span><strong>Market Ledger</strong><span>Daily financial data tracker</span></span></a>
+    <div class="nav-links"><a href="index.html">Today</a><a href="browse.html" aria-current="page">Browse</a><a href="trends.html">Trends</a></div>
+  </nav>
+  <main class="shell">
+    <section class="page-title"><p class="eyebrow">The watchlist</p><h1>Browse the book.</h1><p class="lede">Filter the latest snapshot, sort by any numeric field, and star the names you want to keep close.</p></section>
+    <section class="panel controls" aria-label="Browse filters">
+      <label>Search item<input id="item-search" type="search" placeholder="Try NVIDIA or bitcoin"></label>
+      <label>Category<select id="category-filter"><option value="">All categories</option></select></label>
+      <label>Source<select id="source-filter"><option value="">All sources</option></select></label>
+      <label>Sort numeric field<select id="sort-filter"><option value="item:asc">Item A → Z</option><option value="close_usd:desc">Close: high → low</option><option value="close_usd:asc">Close: low → high</option><option value="change_pct:desc">Change: high → low</option><option value="change_pct:asc">Change: low → high</option><option value="volume:desc">Volume: high → low</option><option value="volume:asc">Volume: low → high</option></select></label>
+    </section>
+    <div class="panel-head" style="padding:0 4px 14px;border:0"><div><h2>Latest values</h2><p id="shortlist-note">Your shortlist stays in this browser.</p></div><span class="muted" id="browse-count">Loading…</span></div>
+    <section class="panel"><div class="table-wrap"><table><thead><tr><th>Star</th><th>Item</th><th>Close / NAV</th><th>Daily change</th><th>Volume</th><th>Snapshot</th></tr></thead><tbody id="browse-values"><tr><td class="empty" colspan="6">Loading market data…</td></tr></tbody></table></div></section>
+  </main>
+  <footer class="footer">Use the star column to create a private, browser-persisted shortlist.</footer>
+  <p class="empty" data-error></p>
+  <script src="app.js" defer></script>
+  <script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("service-worker.js");</script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07111f">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <title>Market Ledger · Trends</title>
+</head>
+<body>
+  <nav class="nav" aria-label="Primary navigation">
+    <a class="brand" href="index.html"><span class="brand-mark">↗</span><span><strong>Market Ledger</strong><span>Daily financial data tracker</span></span></a>
+    <div class="nav-links"><a href="index.html">Today</a><a href="browse.html">Browse</a><a href="trends.html" aria-current="page">Trends</a></div>
+  </nav>
+  <main class="shell">
+    <section class="page-title"><p class="eyebrow">The research desk</p><h1>Find the shape of the tape.</h1><p class="lede">Every figure on this page is calculated in your browser from <code>history.csv</code>. Change the selector to inspect close, percentage change, or volume across the full archive.</p></section>
+    <section class="panel" style="padding:18px;margin-bottom:18px">
+      <div class="trend-controls"><label>Numeric value<select id="trend-field"><option value="close_usd">Close / NAV (USD)</option><option value="change_pct">Daily change (%)</option><option value="volume">Volume</option></select></label><label>Chart items<div id="trend-items" class="check-grid"></div></label></div>
+      <div class="chart" id="trend-chart"><div class="chart-empty">Loading history…</div></div>
+    </section>
+    <section class="finding-grid">
+      <article class="panel finding"><h2 id="finding-one-title">Finding one</h2><p id="finding-one-text">Calculating from history…</p><div class="chart" id="finding-one-chart"></div></article>
+      <article class="panel finding"><h2 id="finding-two-title">Finding two</h2><p id="finding-two-text">Calculating from history…</p><div class="chart" id="finding-two-chart"></div></article>
+      <article class="panel finding"><h2 id="finding-three-title">Finding three</h2><p id="finding-three-text">Calculating from history…</p><div class="chart" id="finding-three-chart"></div></article>
+      <article class="panel finding"><h2 id="finding-four-title">Finding four</h2><p id="finding-four-text">Calculating from history…</p><div class="chart" id="finding-four-chart"></div></article>
+    </section>
+  </main>
+  <footer class="footer">Trends are computed client-side from the rows stored in the history file.</footer>
+  <p class="empty" data-error></p>
+  <script src="app.js" defer></script>
+  <script src="trends.js" defer></script>
+  <script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("service-worker.js");</script>
+</body>
+</html>

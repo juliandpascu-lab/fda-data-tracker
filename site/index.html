@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07111f">
+  <meta name="description" content="Daily market data tracker for ten stocks, funds, indexes, and crypto items.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <title>Market Ledger · Today</title>
+</head>
+<body>
+  <nav class="nav" aria-label="Primary navigation">
+    <a class="brand" href="index.html"><span class="brand-mark">↗</span><span><strong>Market Ledger</strong><span>Daily financial data tracker</span></span></a>
+    <div class="nav-links"><a href="index.html" aria-current="page">Today</a><a href="browse.html">Browse</a><a href="trends.html">Trends</a></div>
+  </nav>
+  <main class="shell">
+    <section class="hero-row">
+      <div>
+        <p class="eyebrow">Financial Data Analytics · Live book</p>
+        <h1>The market, kept in motion.</h1>
+        <p class="lede">A reproducible daily snapshot of the instruments you care about—from the S&amp;P 500 and megacap stocks to funds and digital assets.</p>
+      </div>
+      <div class="hero-meta"><span>Last successful run</span><strong id="last-run">Loading…</strong><small>Snapshot date: <span id="run-date">—</span></small></div>
+    </section>
+    <section class="stat-grid" aria-label="Tracker summary">
+      <article class="stat"><span class="stat-label">Days watched</span><strong class="stat-value" id="days-with-success">—</strong><span class="stat-note">successful collection dates</span></article>
+      <article class="stat"><span class="stat-label">Latest items</span><strong class="stat-value" id="item-count">—</strong><span class="stat-note">tracked in the current snapshot</span></article>
+      <article class="stat"><span class="stat-label">New today</span><strong class="stat-value" id="new-count">—</strong><span class="stat-note">items appearing in the latest run</span></article>
+      <article class="stat"><span class="stat-label">Gone today</span><strong class="stat-value" id="gone-count">—</strong><span class="stat-note">items missing after a source return</span></article>
+    </section>
+    <section class="two-col">
+      <article class="panel">
+        <div class="panel-head"><div><h2>Latest tape</h2><p>Most recent close, daily change, and reported volume.</p></div><span class="status-pill"><span id="source-count">—</span> feeds</span></div>
+        <div class="table-wrap"><table><thead><tr><th>Item</th><th>Source</th><th>Close / NAV</th><th>Daily change</th><th>Volume</th></tr></thead><tbody id="latest-values"><tr><td class="empty" colspan="5">Loading market data…</td></tr></tbody></table></div>
+      </article>
+      <aside class="panel"><div class="panel-head"><div><h2>Biggest moves</h2><p>Ranked by absolute daily percentage change.</p></div></div><div class="panel-body"><div class="move-list" id="biggest-moves"><div class="empty">Loading…</div></div></div></aside>
+    </section>
+    <section class="panel" style="margin-top:18px"><div class="panel-head"><div><h2>Collection desk</h2><p>Every configured source is reported, including failures.</p></div></div><div class="panel-body"><div class="source-list" id="source-list"><div class="empty">Loading source statuses…</div></div></div></section>
+  </main>
+  <footer class="footer">Market Ledger · Data is collected from public Yahoo Finance Chart JSON and rebuilt from the compressed raw archive.</footer>
+  <p class="empty" data-error></p>
+  <script src="app.js" defer></script>
+  <script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("service-worker.js");</script>
+</body>
+</html>

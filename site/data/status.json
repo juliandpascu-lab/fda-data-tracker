@@ -1,0 +1,60 @@
+{
+  "run_time": "2026-11-24T19:29:23.253488Z",
+  "first_run_date": "2026-11-24",
+  "days_with_success": 1,
+  "items": 10,
+  "new_today": 10,
+  "gone_today": 0,
+  "sources": [
+    {
+      "name": "yahoo_finance_chart_sp500",
+      "ok": true,
+      "count": 1
+    },
+    {
+      "name": "yahoo_finance_chart_nvidia",
+      "ok": true,
+      "count": 1
+    },
+    {
+      "name": "yahoo_finance_chart_palantir",
+      "ok": true,
+      "count": 1
+    },
+    {
+      "name": "yahoo_finance_chart_q2",
+      "ok": true,
+      "count": 1
+    },
+    {
+      "name": "yahoo_finance_chart_bitcoin",
+      "ok": true,
+      "count": 1
+    },
+    {
+      "name": "yahoo_finance_chart_ethereum",
+      "ok": true,
+      "count": 1
+    },
+    {
+      "name": "yahoo_finance_chart_vanguard_morningstar",
+      "ok": true,
+      "count": 1
+    },
+    {
+      "name": "yahoo_finance_chart_hartford_schroders",
+      "ok": true,
+      "count": 1
+    },
+    {
+      "name": "yahoo_finance_chart_apple",
+      "ok": true,
+      "count": 1
+    },
+    {
+      "name": "yahoo_finance_chart_jpmorgan",
+      "ok": true,
+      "count": 1
+    }
+  ]
+}

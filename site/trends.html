@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#07111f">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=market-terminal-4">
   <title>Market Ledger · Trends</title>
 </head>
 <body>
@@ -17,7 +17,7 @@
   <main class="shell">
     <section class="page-title"><p class="eyebrow">The research desk</p><h1>Find the shape of the tape.</h1><p class="lede">Every figure on this page is calculated in your browser from <code>history.csv</code>. Change the selector to inspect close, percentage change, or volume across the full archive.</p></section>
     <section class="panel" style="padding:18px;margin-bottom:18px">
-      <div class="trend-controls"><label>Numeric value<select id="trend-field"><option value="close_usd">Close / NAV (USD)</option><option value="change_pct">Daily change (%)</option><option value="volume">Volume</option></select></label><label>Chart items<div id="trend-items" class="check-grid"></div></label></div>
+      <div class="trend-controls"><label>Snapshot date<select id="trend-date"><option value="">Loading dates…</option></select></label><label>Numeric value<select id="trend-field"><option value="close_usd">Close / NAV (USD)</option><option value="change_pct">Daily change (%)</option><option value="volume">Volume</option></select></label><label>Chart items<div id="trend-items" class="check-grid"></div></label></div>
       <div class="chart" id="trend-chart"><div class="chart-empty">Loading history…</div></div>
     </section>
     <section class="finding-grid">
@@ -29,7 +29,7 @@
   </main>
   <footer class="footer">Trends are computed client-side from the rows stored in the history file.</footer>
   <p class="empty" data-error></p>
-  <script src="app.js" defer></script>
+  <script src="app.js?v=market-terminal-4" defer></script>
   <script src="trends.js" defer></script>
   <script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("service-worker.js");</script>
 </body>

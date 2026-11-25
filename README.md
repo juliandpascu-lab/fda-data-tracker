@@ -77,8 +77,8 @@ python -m data_tracker.cli build-history
 
 `data/status.json` contains `run_time`, `first_run_date`,
 `days_with_success`, `items`, `new_today`, `gone_today`, and a `sources` list.
-Each source entry contains `name`, `ok`, and `count`, with an error message when
-the source fails.
+It also records `run_window` (`open`, `close`, or `manual`). Each source entry
+contains `name`, `ok`, and `count`, with an error message when the source fails.
 
 ## Pipeline and schedule
 
@@ -100,13 +100,16 @@ rerun counts as one successful date.
 
 ## Site
 
-- `site/index.html` is the Today page. It shows the last run, source status,
-  status counts, every latest item value with its change, and the biggest moves.
+- `site/index.html` is the Today page. It shows the last run and open/close
+  window, next refresh countdown, source freshness, status counts, ticker strip,
+  market pulse, breadth cards, heatmap, latest values, biggest moves, and data
+  quality checks.
 - `site/browse.html` shows the latest values with category and source filters,
-  item-name search, numeric ascending/descending sorts, and a browser-persisted
-  shortlist.
+  item-name search, numeric ascending/descending sorts, browser-persisted
+  shortlist, and a close-price sparkline for every item.
 - `site/trends.html` calculates a selectable time-series chart for every
-  numeric field and four history-based findings in the browser.
+  numeric field, supports historical snapshot-date selection, and computes four
+  history-based findings in the browser.
 - `site/manifest.webmanifest` and `site/service-worker.js` make the site
   installable and available with the last loaded data when offline.
 

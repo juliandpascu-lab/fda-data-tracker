@@ -7,7 +7,7 @@
   <meta name="description" content="Daily market data tracker for ten stocks, funds, indexes, and crypto items.">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles.css?v=market-terminal-3">
+  <link rel="stylesheet" href="styles.css?v=market-terminal-4">
   <title>Market Ledger · Today</title>
 </head>
 <body>
@@ -22,7 +22,7 @@
         <h1>The market, kept in motion.</h1>
         <p class="lede">A reproducible daily snapshot of the instruments you care about—from the S&amp;P 500 and megacap stocks to funds and digital assets.</p>
       </div>
-      <div class="hero-meta"><span>Last successful run</span><strong id="last-run">Loading…</strong><small>Snapshot date: <span id="run-date">—</span></small></div>
+      <div class="hero-meta"><span>Last successful run</span><strong id="last-run">Loading…</strong><small>Snapshot date: <span id="run-date">—</span></small><small>Refresh window: <span id="run-window">—</span></small><small>Next refresh: <span id="next-refresh">calculating…</span></small></div>
     </section>
     <section class="ticker-band" aria-label="Market ticker">
       <div class="ticker-label"><span class="live-dot"></span> Market watch</div>
@@ -41,6 +41,16 @@
       </div>
       <div class="panel-body pulse-body"><div class="chart-shell"><div class="chart-grid-lines"><i></i><i></i><i></i></div><div id="market-pulse-chart" class="pulse-chart"><div class="chart-empty">Loading market pulse…</div></div></div><div class="pulse-legend"><span><i class="legend-line"></i> average daily move</span><span><i class="legend-dot up"></i> positive breadth</span><span><i class="legend-dot down"></i> negative breadth</span></div></div>
     </section>
+    <section class="breadth-grid" aria-label="Market breadth summary">
+      <article class="breadth-card"><span class="breadth-label">Market breadth</span><strong id="breadth-ratio">—</strong><div class="breadth-track"><i id="breadth-bar"></i></div><small id="breadth-detail">Waiting for the latest snapshot</small></article>
+      <article class="breadth-card"><span class="breadth-label">Strongest performer</span><strong id="strongest-item">—</strong><small id="strongest-detail">—</small></article>
+      <article class="breadth-card"><span class="breadth-label">Weakest performer</span><strong id="weakest-item">—</strong><small id="weakest-detail">—</small></article>
+      <article class="breadth-card"><span class="breadth-label">Average daily move</span><strong id="average-move">—</strong><small>Across the latest tracked items</small></article>
+    </section>
+    <section class="panel heatmap-panel">
+      <div class="panel-head"><div><h2>Market heatmap</h2><p>Every tracked item colored by its latest percentage move.</p></div><span class="muted">green = up · red = down</span></div>
+      <div class="panel-body"><div class="heatmap" id="market-heatmap"><div class="empty">Loading market heatmap…</div></div></div>
+    </section>
     <section class="two-col">
       <article class="panel">
         <div class="panel-head"><div><h2>Latest tape</h2><p>Most recent close, daily change, and reported volume.</p></div><span class="status-pill"><span id="source-count">—</span> feeds</span></div>
@@ -48,11 +58,12 @@
       </article>
       <aside class="panel"><div class="panel-head"><div><h2>Biggest moves</h2><p>Ranked by absolute daily percentage change.</p></div></div><div class="panel-body"><div class="move-list" id="biggest-moves"><div class="empty">Loading…</div></div></div></aside>
     </section>
-    <section class="panel" style="margin-top:18px"><div class="panel-head"><div><h2>Collection desk</h2><p>Every configured source is reported, including failures.</p></div></div><div class="panel-body"><div class="source-list" id="source-list"><div class="empty">Loading source statuses…</div></div></div></section>
+    <section class="panel" style="margin-top:18px"><div class="panel-head"><div><h2>Collection desk</h2><p>Every configured source is reported, including failures.</p></div></div><div class="panel-body"><div class="freshness-grid"><div><span>Last refresh</span><strong id="freshness-time">—</strong></div><div><span>Refresh type</span><strong id="freshness-window">—</strong></div><div><span>Source health</span><strong id="freshness-health">—</strong></div><div><span>Archive status</span><strong class="positive">Raw + history saved</strong></div></div><div class="source-list" id="source-list"><div class="empty">Loading source statuses…</div></div></div></section>
+    <section class="panel quality-panel"><div class="panel-head"><div><h2>Data quality</h2><p id="data-quality-summary">Checking the latest row for every item.</p></div><span class="status-pill" id="quality-pill">Checking</span></div><div class="panel-body"><div class="quality-grid" id="data-quality"><div class="empty">Loading quality checks…</div></div></div></section>
   </main>
   <footer class="footer">Market Ledger · Data is collected from public Yahoo Finance Chart JSON and rebuilt from the compressed raw archive.</footer>
   <p class="empty" data-error></p>
-  <script src="app.js?v=market-terminal-3" defer></script>
+  <script src="app.js?v=market-terminal-4" defer></script>
   <script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("service-worker.js");</script>
 </body>
 </html>

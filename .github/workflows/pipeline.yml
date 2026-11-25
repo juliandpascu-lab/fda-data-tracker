@@ -22,20 +22,24 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       run: ${{ steps.window.outputs.run }}
+      window: ${{ steps.window.outputs.window }}
     steps:
       - name: Select Central market window
         id: window
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             echo "run=true" >> "$GITHUB_OUTPUT"
+            echo "window=manual" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           local_time="$(TZ=America/Chicago date +%H%M)"
           if { [ "$local_time" -ge 830 ] && [ "$local_time" -lt 850 ]; } || { [ "$local_time" -ge 1500 ] && [ "$local_time" -lt 1520 ]; }; then
             echo "run=true" >> "$GITHUB_OUTPUT"
+            if [ "$local_time" -lt 1200 ]; then echo "window=open" >> "$GITHUB_OUTPUT"; else echo "window=close" >> "$GITHUB_OUTPUT"; fi
             echo "Running market window at ${local_time} America/Chicago"
           else
             echo "run=false" >> "$GITHUB_OUTPUT"
+            echo "window=skip" >> "$GITHUB_OUTPUT"
             echo "Ignoring seasonal duplicate trigger at ${local_time} America/Chicago"
           fi
 
@@ -61,6 +65,7 @@ jobs:
       - name: Fetch feeds, rebuild history, update Issue, and commit data
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MARKET_WINDOW: ${{ needs.market_window.outputs.window }}
         run: python -m data_tracker.cli run
       - name: Configure Pages
         uses: actions/configure-pages@v5

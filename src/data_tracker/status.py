@@ -15,7 +15,7 @@ def _utc_iso(value: datetime | None = None) -> str:
     return value.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
-def build_status(run_time: datetime, source_results: list[dict[str, object]], rows: list[dict[str, object]]) -> dict[str, object]:
+def build_status(run_time: datetime, source_results: list[dict[str, object]], rows: list[dict[str, object]], run_window: str = "manual") -> dict[str, object]:
     dates = raw_dates()
     latest_date = dates[-1] if dates else ""
     previous_date = dates[-2] if len(dates) > 1 else None
@@ -36,6 +36,7 @@ def build_status(run_time: datetime, source_results: list[dict[str, object]], ro
         "items": len(latest_ids),
         "new_today": len(latest_ids - previous_ids),
         "gone_today": gone,
+        "run_window": run_window,
         "sources": source_results,
     }
 

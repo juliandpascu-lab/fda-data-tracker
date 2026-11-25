@@ -35,42 +35,53 @@
     const groups = rowsByItem(rows);
     const items = Object.values(groups).map((itemRows) => itemRows[0]).sort((a, b) => a.item.localeCompare(b.item));
     const checks = $("#trend-items");
+    const dateSelect = $("#trend-date");
+    const dates = [...new Set(rows.map((row) => row.date))].sort();
+    dateSelect.innerHTML = `<option value="">Latest available (${esc(state.latestDate)})</option>` + dates.slice().reverse().map((date) => `<option value="${esc(date)}">${esc(date)}</option>`).join("");
     checks.innerHTML = items.map((item, index) => `<label><input type="checkbox" value="${esc(item.item_id)}" ${index < 5 ? "checked" : ""}>${esc(item.item)}</label>`).join("");
     const selected = () => new Set([...checks.querySelectorAll("input:checked")].map((input) => input.value));
+    const scopedRows = () => rows.filter((row) => !dateSelect.value || row.date <= dateSelect.value);
+    const scopedDate = () => dateSelect.value || state.latestDate;
     const drawTrend = () => {
       const field = $("#trend-field").value;
-      const series = items.filter((item) => selected().has(item.item_id)).map((item) => ({ name: item.item, values: (groups[item.item_id] || []).filter((row) => row[field] !== "").map((row) => ({ date: row.date, value: n(row[field]) })) }));
+      const scopedGroups = rowsByItem(scopedRows());
+      const series = items.filter((item) => selected().has(item.item_id)).map((item) => ({ name: item.item, values: (scopedGroups[item.item_id] || []).filter((row) => row[field] !== "").map((row) => ({ date: row.date, value: n(row[field]) })) }));
       lineChart($("#trend-chart"), series, field);
     };
+    const drawFindings = () => {
+      const historyRows = scopedRows();
+      const historyGroups = rowsByItem(historyRows);
+      const snapshotDate = scopedDate();
+      const latestRows = historyRows.filter((row) => row.date === snapshotDate);
+      const latestMoves = latestRows.filter((row) => row.change_pct !== "").map((row) => ({ name: row.item, value: n(row.change_pct) })).sort((a, b) => Math.abs(b.value) - Math.abs(a.value)).slice(0, 6);
+      const topMove = latestMoves[0];
+      $("#finding-one-title").textContent = topMove ? `${topMove.name} is the sharpest move on ${snapshotDate}` : "Moves are not available for this date";
+      $("#finding-one-text").textContent = topMove ? `The selected snapshot ranks items by the absolute value of daily percentage change. ${topMove.name} moved ${topMove.value >= 0 ? "up" : "down"} ${Math.abs(topMove.value).toFixed(2)}% in the source response.` : "This date needs a prior observation before a percentage move can be calculated.";
+      barChart($("#finding-one-chart"), latestMoves);
+
+      const returns = items.map((item) => { const history = (historyGroups[item.item_id] || []).filter((row) => row.close_usd !== ""); const first = n(history[0]?.close_usd), last = n(history.at(-1)?.close_usd); return { name: item.item, value: history.length > 1 && first ? (last / first - 1) * 100 : 0 }; }).sort((a, b) => b.value - a.value);
+      const best = returns[0];
+      $("#finding-two-title").textContent = best ? `${best.name} leads the return through ${snapshotDate}` : "Full-history return is not available yet";
+      $("#finding-two-text").textContent = best ? `This is calculated as (selected close ÷ first recorded close − 1) × 100. Through ${snapshotDate}, ${best.name} has the strongest change at ${best.value >= 0 ? "+" : ""}${best.value.toFixed(2)}%.` : "More than one observation is needed for a return calculation.";
+      barChart($("#finding-two-chart"), returns.slice(0, 6), "#66a9ff", "%");
+
+      const ranges = items.map((item) => { const values = (historyGroups[item.item_id] || []).map((row) => n(row.close_usd)).filter(Number.isFinite); return { name: item.item, value: values.length ? Math.max(...values) - Math.min(...values) : 0 }; }).sort((a, b) => b.value - a.value);
+      const widest = ranges[0];
+      $("#finding-three-title").textContent = widest ? `${widest.name} has the widest range through ${snapshotDate}` : "Close ranges are not available yet";
+      $("#finding-three-text").textContent = widest ? `Range is the maximum recorded close minus the minimum recorded close through the selected date. ${widest.name} spans ${widest.value.toLocaleString(undefined, { maximumFractionDigits: 2 })} price units.` : "The history file has not accumulated enough values for a range.";
+      barChart($("#finding-three-chart"), ranges.slice(0, 6), "#f5c66d");
+
+      const activity = items.map((item) => { const values = (historyGroups[item.item_id] || []).map((row) => n(row.volume)).filter(Number.isFinite); return { name: item.item, value: values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0 }; }).sort((a, b) => b.value - a.value);
+      const active = activity[0];
+      $("#finding-four-title").textContent = active ? `${active.name} has the highest average volume` : "Average volume is not available yet";
+      $("#finding-four-text").textContent = active ? `Average volume is the arithmetic mean through ${snapshotDate}. ${active.name} currently leads at ${active.value.toLocaleString(undefined, { maximumFractionDigits: 0 })} reported units per observation.` : "The sources have not reported volume values yet.";
+      barChart($("#finding-four-chart"), activity.slice(0, 6), "#b99cff");
+    };
+    const redraw = () => { drawTrend(); drawFindings(); };
     checks.addEventListener("change", drawTrend);
     $("#trend-field").addEventListener("change", drawTrend);
-    drawTrend();
-
-    const latestDate = state.latestDate;
-    const latestRows = rows.filter((row) => row.date === latestDate);
-    const latestMoves = latestRows.filter((row) => row.change_pct !== "").map((row) => ({ name: row.item, value: n(row.change_pct) })).sort((a, b) => Math.abs(b.value) - Math.abs(a.value)).slice(0, 6);
-    const topMove = latestMoves[0];
-    $("#finding-one-title").textContent = topMove ? `${topMove.name} is the sharpest latest move` : "Latest moves are not available yet";
-    $("#finding-one-text").textContent = topMove ? `The current snapshot ranks items by the absolute value of daily percentage change. ${topMove.name} moved ${topMove.value >= 0 ? "up" : "down"} ${Math.abs(topMove.value).toFixed(2)}% in the source response.` : "The first snapshot needs a prior observation before a percentage move can be calculated.";
-    barChart($("#finding-one-chart"), latestMoves);
-
-    const returns = items.map((item) => { const history = (groups[item.item_id] || []).filter((row) => row.close_usd !== ""); const first = n(history[0]?.close_usd), last = n(history.at(-1)?.close_usd); return { name: item.item, value: history.length > 1 && first ? (last / first - 1) * 100 : 0 }; }).sort((a, b) => b.value - a.value);
-    const best = returns[0];
-    $("#finding-two-title").textContent = best ? `${best.name} leads the full-history return` : "Full-history return is not available yet";
-    $("#finding-two-text").textContent = best ? `This is calculated as (latest close ÷ first recorded close − 1) × 100. Across the rows currently stored, ${best.name} has the strongest change at ${best.value >= 0 ? "+" : ""}${best.value.toFixed(2)}%.` : "More than one observation is needed for a return calculation.";
-    barChart($("#finding-two-chart"), returns.slice(0, 6), "#66a9ff", "%");
-
-    const ranges = items.map((item) => { const values = (groups[item.item_id] || []).map((row) => n(row.close_usd)).filter(Number.isFinite); return { name: item.item, value: values.length ? Math.max(...values) - Math.min(...values) : 0 }; }).sort((a, b) => b.value - a.value);
-    const widest = ranges[0];
-    $("#finding-three-title").textContent = widest ? `${widest.name} has the widest close range` : "Close ranges are not available yet";
-    $("#finding-three-text").textContent = widest ? `Range is the maximum recorded close minus the minimum recorded close in the history file. ${widest.name} spans ${widest.value.toLocaleString(undefined, { maximumFractionDigits: 2 })} price units across its observations.` : "The history file has not accumulated enough values for a range.";
-    barChart($("#finding-three-chart"), ranges.slice(0, 6), "#f5c66d");
-
-    const activity = items.map((item) => { const values = (groups[item.item_id] || []).map((row) => n(row.volume)).filter(Number.isFinite); return { name: item.item, value: values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0 }; }).sort((a, b) => b.value - a.value);
-    const active = activity[0];
-    $("#finding-four-title").textContent = active ? `${active.name} has the highest average volume` : "Average volume is not available yet";
-    $("#finding-four-text").textContent = active ? `Average volume is the arithmetic mean of each recorded volume value for an item. ${active.name} currently leads at ${active.value.toLocaleString(undefined, { maximumFractionDigits: 0 })} reported units per observation.` : "The sources have not reported volume values yet.";
-    barChart($("#finding-four-chart"), activity.slice(0, 6), "#b99cff");
+    $("#trend-date").addEventListener("change", redraw);
+    redraw();
   }
 
   if (window.dataTrackerReady) window.dataTrackerReady.then(setup).catch(() => {});

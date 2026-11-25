@@ -1,5 +1,5 @@
-const CACHE = "market-ledger-v3";
-const APP_SHELL = ["./", "index.html", "browse.html", "trends.html", "styles.css", "app.js", "trends.js", "manifest.webmanifest", "icon.svg", "data/history.csv", "data/status.json"];
+const CACHE = "market-ledger-v4";
+const APP_SHELL = ["./", "index.html", "browse.html", "trends.html", "styles.css?v=market-terminal-4", "app.js?v=market-terminal-4", "trends.js", "manifest.webmanifest", "icon.svg", "data/history.csv", "data/status.json"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(APP_SHELL)).then(() => self.skipWaiting()));

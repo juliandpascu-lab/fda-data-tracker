@@ -10,6 +10,7 @@
   const pct = (value) => value === "" || value === null || value === undefined || Number.isNaN(Number(value)) ? "—" : `${Number(value) >= 0 ? "+" : ""}${number(value)}%`;
   const changeClass = (value) => value === "" || value === null || value === undefined ? "neutral" : Number(value) >= 0 ? "positive" : "negative";
   const labelize = (value) => String(value || "").replaceAll("_", " ").replace(/\b\w/g, (char) => char.toUpperCase());
+  const centralFormatter = new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false, hourCycle: "h23" });
 
   function parseCSV(text) {
     const records = [];
@@ -64,10 +65,104 @@
   function latestRows() { return state.rows.filter((row) => row.date === state.latestDate); }
   function sourceRows() { return state.status.sources || []; }
 
+  function centralParts(date) {
+    return Object.fromEntries(centralFormatter.formatToParts(date).filter((part) => part.type !== "literal").map((part) => [part.type, part.value]));
+  }
+
+  function centralDateToUTC(year, month, day, hour, minute) {
+    const desired = Date.UTC(year, month - 1, day, hour, minute);
+    const guess = new Date(desired);
+    const parts = centralParts(guess);
+    const observed = Date.UTC(Number(parts.year), Number(parts.month) - 1, Number(parts.day), Number(parts.hour), Number(parts.minute));
+    return new Date(desired + (desired - observed));
+  }
+
+  function nextRefresh() {
+    const now = new Date();
+    const current = centralParts(now);
+    const base = Date.UTC(Number(current.year), Number(current.month) - 1, Number(current.day));
+    const candidates = [];
+    for (let offset = 0; offset < 3; offset += 1) {
+      const day = new Date(base + offset * 86400000);
+      const year = day.getUTCFullYear(); const month = day.getUTCMonth() + 1; const date = day.getUTCDate();
+      for (const [hour, minute, label] of [[8, 30, "Open"], [15, 0, "Close"]]) {
+        const candidate = centralDateToUTC(year, month, date, hour, minute);
+        if (candidate > now) candidates.push({ candidate, label });
+      }
+    }
+    const next = candidates.sort((a, b) => a.candidate - b.candidate)[0];
+    if (!next) return "—";
+    const diff = Math.max(0, next.candidate - now);
+    const hours = Math.floor(diff / 3600000); const minutes = Math.floor((diff % 3600000) / 60000);
+    const parts = new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).formatToParts(next.candidate);
+    const formatted = Object.fromEntries(parts.filter((part) => part.type !== "literal").map((part) => [part.type, part.value]));
+    return `${next.label} · ${formatted.weekday} ${formatted.month} ${formatted.day}, ${formatted.hour}:${formatted.minute} ${formatted.dayPeriod} CT · ${hours}h ${minutes}m`;
+  }
+
+  function renderNextRefresh() {
+    const target = $("#next-refresh");
+    if (target) target.textContent = nextRefresh();
+  }
+
+  function miniSparkline(itemId) {
+    const points = state.rows.filter((row) => row.item_id === itemId && row.close_usd !== "").map((row) => Number(row.close_usd)).filter(Number.isFinite);
+    if (!points.length) return "";
+    const width = 116, height = 28, pad = 3;
+    let min = Math.min(...points), max = Math.max(...points);
+    if (min === max) { min -= 1; max += 1; }
+    const x = (index) => pad + (index / Math.max(1, points.length - 1)) * (width - pad * 2);
+    const y = (value) => pad + ((max - value) / (max - min)) * (height - pad * 2);
+    const path = points.map((point, index) => `${index ? "L" : "M"}${x(index).toFixed(1)},${y(point).toFixed(1)}`).join(" ");
+    return `<svg class="mini-sparkline" viewBox="0 0 ${width} ${height}" role="img" aria-label="${esc(itemId)} close history"><path d="${path}"/><circle cx="${x(points.length - 1).toFixed(1)}" cy="${y(points.at(-1)).toFixed(1)}" r="2.5"/></svg>`;
+  }
+
   function renderTickerStrip() {
     const target = $("#ticker-strip");
     if (!target) return;
     target.innerHTML = latestRows().map((row) => `<div class="ticker-chip"><strong>${esc(row.item_id.toUpperCase())}</strong><small>$${number(row.close_usd)}</small><span class="${changeClass(row.change_pct)}">${pct(row.change_pct)}</span></div>`).join("") || '<span class="ticker-loading">No latest quotes are available.</span>';
+  }
+
+  function renderBreadth(rows) {
+    const values = rows.filter((row) => row.change_pct !== "").map((row) => ({ ...row, move: Number(row.change_pct) }));
+    const up = values.filter((row) => row.move > 0).length;
+    const down = values.filter((row) => row.move < 0).length;
+    const average = values.length ? values.reduce((sum, row) => sum + row.move, 0) / values.length : 0;
+    const strongest = [...values].sort((a, b) => b.move - a.move)[0];
+    const weakest = [...values].sort((a, b) => a.move - b.move)[0];
+    const ratio = $("#breadth-ratio"); const bar = $("#breadth-bar"); const detail = $("#breadth-detail");
+    if (ratio) ratio.textContent = `${up} up · ${down} down`;
+    if (bar) { bar.style.width = values.length ? `${up / values.length * 100}%` : "0%"; bar.className = up >= down ? "positive" : "negative"; }
+    if (detail) detail.textContent = `${values.length - up - down} unchanged or missing`;
+    const strongestTarget = $("#strongest-item"); const strongestDetail = $("#strongest-detail");
+    if (strongestTarget) strongestTarget.textContent = strongest ? strongest.item : "—";
+    if (strongestDetail) strongestDetail.textContent = strongest ? pct(strongest.move) : "—";
+    const weakestTarget = $("#weakest-item"); const weakestDetail = $("#weakest-detail");
+    if (weakestTarget) weakestTarget.textContent = weakest ? weakest.item : "—";
+    if (weakestDetail) weakestDetail.textContent = weakest ? pct(weakest.move) : "—";
+    const averageTarget = $("#average-move");
+    if (averageTarget) { averageTarget.textContent = pct(average); averageTarget.className = changeClass(average); }
+  }
+
+  function renderHeatmap(rows) {
+    const target = $("#market-heatmap");
+    if (!target) return;
+    const values = rows.filter((row) => row.change_pct !== "").map((row) => ({ ...row, move: Number(row.change_pct) }));
+    const maximum = Math.max(...values.map((row) => Math.abs(row.move)), 1);
+    target.innerHTML = values.map((row) => `<div class="heat-cell ${changeClass(row.move)}" style="--heat:${Math.max(.16, Math.abs(row.move) / maximum * .8)}"><strong>${esc(row.item_id.toUpperCase())}</strong><span>${pct(row.move)}</span><small>$${number(row.close_usd)}</small></div>`).join("") || '<div class="empty">No movement data is available yet.</div>';
+  }
+
+  function renderQuality(rows) {
+    const target = $("#data-quality");
+    if (!target) return;
+    let complete = 0;
+    target.innerHTML = rows.map((row) => {
+      const missing = ["close_usd", "change_pct", "volume"].filter((field) => row[field] === "" || row[field] === null || row[field] === undefined);
+      if (!missing.length) complete += 1;
+      return `<div class="quality-row"><div><strong>${esc(row.item)}</strong><small>${esc(row.source)} · ${esc(row.date)}</small></div><span class="quality-state ${missing.length ? "bad" : "good"}">${missing.length ? `Missing ${missing.join(", ")}` : "Complete"}</span></div>`;
+    }).join("") || '<div class="empty">No rows are available for quality checks.</div>';
+    const summary = $("#data-quality-summary"); const pill = $("#quality-pill");
+    if (summary) summary.textContent = `${complete} of ${rows.length} latest rows contain close, change, and volume values.`;
+    if (pill) { pill.textContent = rows.length && complete === rows.length ? "All complete" : `${complete}/${rows.length} complete`; pill.className = `status-pill ${complete === rows.length ? "" : "bad"}`; }
   }
 
   function renderMarketPulse() {
@@ -115,15 +210,22 @@
     const status = state.status;
     $("#last-run").textContent = status.run_time || "Not run yet";
     $("#run-date").textContent = state.latestDate || "Awaiting first collection";
+    $("#run-window").textContent = labelize(status.run_window || "manual");
     $("#days-with-success").textContent = integer(status.days_with_success);
     $("#item-count").textContent = integer(status.items);
     $("#new-count").textContent = integer(status.new_today);
     $("#gone-count").textContent = integer(status.gone_today);
     $("#source-count").textContent = `${sourceRows().filter((source) => source.ok).length}/${sourceRows().length || 0}`;
+    $("#freshness-time").textContent = status.run_time || "—";
+    $("#freshness-window").textContent = labelize(status.run_window || "manual");
+    $("#freshness-health").textContent = `${sourceRows().filter((source) => source.ok).length}/${sourceRows().length || 0} healthy`;
     renderSources();
     renderTickerStrip();
     renderMarketPulse();
     const rows = latestRows();
+    renderBreadth(rows);
+    renderHeatmap(rows);
+    renderQuality(rows);
     $("#latest-values").innerHTML = rows.map((row) => `<tr><td class="item-cell"><strong>${esc(row.item)}</strong><small>${esc(row.category)} · ${esc(row.item_id)}</small></td><td>${esc(row.source)}</td><td class="big-number">$${number(row.close_usd)}</td><td class="${changeClass(row.change_pct)} big-number">${pct(row.change_pct)}</td><td>${integer(row.volume)}</td></tr>`).join("") || '<tr><td class="empty" colspan="5">No market snapshot loaded yet.</td></tr>';
     const moves = [...rows].filter((row) => row.change_pct !== "").sort((a, b) => Math.abs(Number(b.change_pct)) - Math.abs(Number(a.change_pct))).slice(0, 5);
     $("#biggest-moves").innerHTML = moves.map((row) => `<div class="move"><div><strong>${esc(row.item)}</strong><small>$${number(row.close_usd)} current close</small></div><div class="move-value ${changeClass(row.change_pct)}">${pct(row.change_pct)}</div></div>`).join("") || '<div class="empty">No moves are available yet.</div>';
@@ -152,7 +254,7 @@
         return ((Number.isNaN(aValue) ? -Infinity : aValue) - (Number.isNaN(bValue) ? -Infinity : bValue)) * (direction === "desc" ? -1 : 1);
       });
       $("#browse-count").textContent = `${filtered.length} of ${rows.length} latest items`;
-      table.innerHTML = filtered.map((row) => `<tr><td><button class="star ${shortlist.has(row.item_id) ? "on" : ""}" data-star="${esc(row.item_id)}" aria-label="${shortlist.has(row.item_id) ? "Remove" : "Add"} ${esc(row.item)} ${shortlist.has(row.item_id) ? "from" : "to"} shortlist">${shortlist.has(row.item_id) ? "★" : "☆"}</button></td><td class="item-cell"><strong>${esc(row.item)}</strong><small>${esc(row.item_id)} · ${esc(row.category)}</small></td><td>$${number(row.close_usd)}</td><td class="${changeClass(row.change_pct)}">${pct(row.change_pct)}</td><td>${integer(row.volume)}</td><td>${esc(row.date)}</td></tr>`).join("") || '<tr><td class="empty" colspan="6">No items match these filters.</td></tr>';
+      table.innerHTML = filtered.map((row) => `<tr><td><button class="star ${shortlist.has(row.item_id) ? "on" : ""}" data-star="${esc(row.item_id)}" aria-label="${shortlist.has(row.item_id) ? "Remove" : "Add"} ${esc(row.item)} ${shortlist.has(row.item_id) ? "from" : "to"} shortlist">${shortlist.has(row.item_id) ? "★" : "☆"}</button></td><td class="item-cell"><strong>${esc(row.item)}</strong><small>${esc(row.item_id)} · ${esc(row.category)}</small>${miniSparkline(row.item_id)}</td><td>$${number(row.close_usd)}</td><td class="${changeClass(row.change_pct)}">${pct(row.change_pct)}</td><td>${integer(row.volume)}</td><td>${esc(row.date)}</td></tr>`).join("") || '<tr><td class="empty" colspan="6">No items match these filters.</td></tr>';
       $$("[data-star]").forEach((button) => button.addEventListener("click", () => { const next = readShortlist(); const id = button.dataset.star; next.has(id) ? next.delete(id) : next.add(id); saveShortlist(next); render(); }));
       $("#shortlist-note").textContent = `${shortlist.size} item${shortlist.size === 1 ? "" : "s"} saved in this browser`;
     };
@@ -165,6 +267,8 @@
       await loadData();
       renderToday();
       renderBrowse();
+      renderNextRefresh();
+      window.setInterval(renderNextRefresh, 30000);
       document.documentElement.dataset.loaded = "true";
     } catch (error) {
       document.querySelectorAll("[data-error]").forEach((element) => { element.textContent = error.message; });

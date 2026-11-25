@@ -19,6 +19,7 @@ def test_status_counts_latest_items_and_gone_items(monkeypatch):
     assert result["items"] == 1
     assert result["new_today"] == 0
     assert result["gone_today"] == 0
+    assert result["run_window"] == "manual"
 
 
 def test_status_marks_an_item_gone_when_its_source_returned_without_it(monkeypatch):

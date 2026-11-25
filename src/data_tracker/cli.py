@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 import subprocess
 from datetime import datetime, timezone
 
@@ -24,7 +25,7 @@ def run_pipeline(skip_issues: bool = False, skip_commit: bool = False) -> None:
     run_date = now.date()
     source_results = collect(run_date)
     rows = build_history()
-    status = build_status(now, source_results, rows)
+    status = build_status(now, source_results, rows, os.environ.get("MARKET_WINDOW", "manual"))
     write_status(status)
     sync_site_data()
     latest_date = max((row["date"] for row in rows), default="")

@@ -82,11 +82,18 @@ the source fails.
 
 ## Pipeline and schedule
 
-`.github/workflows/pipeline.yml` runs the Python pipeline once per day at
-23:00 UTC, which is 5:00 PM Central during the current CST season. It can also
-be manually dispatched. The run collects raw files, rebuilds history, writes
-status, creates or updates the dated GitHub Issue, commits the generated data,
-and deploys the `site/` directory to GitHub Pages.
+`.github/workflows/pipeline.yml` runs the Python pipeline at the two Central
+market windows: 8:30 AM Central (open) and 3:00 PM Central (close). GitHub
+Actions schedules use UTC, so four seasonal UTC triggers are guarded by a
+small `America/Chicago` time check; only the correct two triggers execute the
+collector. It can also be manually dispatched. The run collects raw files,
+rebuilds history, writes status, creates or updates the dated GitHub Issue,
+commits the generated data, and deploys the `site/` directory to GitHub Pages.
+
+The data contract intentionally keeps one row per item per UTC date. Therefore,
+the open run refreshes the site and raw archive, while the close run replaces
+that date's raw files and history rows with the final close snapshot. A same-day
+rerun counts as one successful date.
 
 `.github/workflows/tests.yml` runs `python -m pytest` on every push.
 `.github/workflows/pages.yml` deploys site-only changes to GitHub Pages.

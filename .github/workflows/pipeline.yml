@@ -1,9 +1,14 @@
-name: Daily Market Data Tracker
+name: Market Data Tracker
 
 on:
   schedule:
-    # 23:00 UTC = 5:00 PM Central while America/Chicago is on CST.
-    - cron: "0 23 * * *"
+    # GitHub cron is UTC. These four triggers cover both CST and CDT; the
+    # guard below runs only the two that are currently 8:30 AM and 3:00 PM
+    # in America/Chicago.
+    - cron: "30 13 * * *"
+    - cron: "30 14 * * *"
+    - cron: "0 20 * * *"
+    - cron: "0 21 * * *"
   workflow_dispatch:
 
 permissions:
@@ -13,7 +18,30 @@ permissions:
   id-token: write
 
 jobs:
+  market_window:
+    runs-on: ubuntu-latest
+    outputs:
+      run: ${{ steps.window.outputs.run }}
+    steps:
+      - name: Select Central market window
+        id: window
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          local_time="$(TZ=America/Chicago date +%H%M)"
+          if { [ "$local_time" -ge 830 ] && [ "$local_time" -lt 850 ]; } || { [ "$local_time" -ge 1500 ] && [ "$local_time" -lt 1520 ]; }; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            echo "Running market window at ${local_time} America/Chicago"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            echo "Ignoring seasonal duplicate trigger at ${local_time} America/Chicago"
+          fi
+
   collect:
+    needs: market_window
+    if: needs.market_window.outputs.run == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository

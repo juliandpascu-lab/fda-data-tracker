@@ -9,13 +9,13 @@ date,item_id,item,source,category,close_usd,change_pct,volume
 2026-11-24,q2,Q2 Holdings,yahoo_finance_chart,Stock,67.849998,1.938102,154715.0
 2026-11-24,sp500,S&P 500,yahoo_finance_chart,Index,7196.419922,-0.563065,1877623000.0
 2026-11-24,vanguard_morningstar,Vanguard Morningstar Total Stock Market Index Fund,yahoo_finance_chart,Fund,172.899994,4.572395,0.0
-2026-11-25,apple,Apple,yahoo_finance_chart,Stock,352.190002,-0.53097,21060811.0
-2026-11-25,bitcoin,Bitcoin,yahoo_finance_chart,Crypto,59470.328125,-0.464348,35177951232.0
-2026-11-25,ethereum,Ethereum,yahoo_finance_chart,Crypto,1670.52002,-0.427659,11905652736.0
+2026-11-25,apple,Apple,yahoo_finance_chart,Stock,353.070007,-0.28243,22490984.0
+2026-11-25,bitcoin,Bitcoin,yahoo_finance_chart,Crypto,59502.648438,-0.410253,36542947328.0
+2026-11-25,ethereum,Ethereum,yahoo_finance_chart,Crypto,1676.430054,-0.075387,11688571904.0
 2026-11-25,hartford_schroders,Hartford Schroders International Stock Fund Class A,yahoo_finance_chart,Fund,22.91,0.26258,0.0
-2026-11-25,jpmorgan,JPMorgan Chase,yahoo_finance_chart,Stock,315.084991,-0.635451,2294029.0
-2026-11-25,nvidia,NVIDIA,yahoo_finance_chart,Stock,143.979996,-7.336857,212371432.0
-2026-11-25,palantir,Palantir,yahoo_finance_chart,Stock,159.050003,-1.321498,9843787.0
-2026-11-25,q2,Q2 Holdings,yahoo_finance_chart,Stock,70.330002,3.777491,237201.0
-2026-11-25,sp500,S&P 500,yahoo_finance_chart,Index,7108.430176,-1.286745,1543786000.0
+2026-11-25,jpmorgan,JPMorgan Chase,yahoo_finance_chart,Stock,315.855011,-0.392619,2464244.0
+2026-11-25,nvidia,NVIDIA,yahoo_finance_chart,Stock,145.270096,-6.50657,227399586.0
+2026-11-25,palantir,Palantir,yahoo_finance_chart,Stock,160.449997,-0.452907,10601064.0
+2026-11-25,q2,Q2 Holdings,yahoo_finance_chart,Stock,70.480003,3.99883,263078.0
+2026-11-25,sp500,S&P 500,yahoo_finance_chart,Index,7120.620117,-1.117466,1658289000.0
 2026-11-25,vanguard_morningstar,Vanguard Morningstar Total Stock Market Index Fund,yahoo_finance_chart,Fund,172.179993,-0.416426,0.0

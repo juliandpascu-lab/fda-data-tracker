@@ -1,10 +1,11 @@
 {
-  "run_time": "2026-11-25T17:39:39.420526Z",
+  "run_time": "2026-11-25T18:00:52.811737Z",
   "first_run_date": "2026-11-24",
   "days_with_success": 2,
   "items": 10,
   "new_today": 0,
   "gone_today": 0,
+  "run_window": "manual",
   "sources": [
     {
       "name": "yahoo_finance_chart_sp500",

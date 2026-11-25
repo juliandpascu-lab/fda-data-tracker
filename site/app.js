@@ -119,7 +119,8 @@
   function renderTickerStrip() {
     const target = $("#ticker-strip");
     if (!target) return;
-    target.innerHTML = latestRows().map((row) => `<div class="ticker-chip"><strong>${esc(row.item_id.toUpperCase())}</strong><small>$${number(row.close_usd)}</small><span class="${changeClass(row.change_pct)}">${pct(row.change_pct)}</span></div>`).join("") || '<span class="ticker-loading">No latest quotes are available.</span>';
+    const chips = latestRows().map((row) => `<div class="ticker-chip"><strong>${esc(row.item_id.toUpperCase())}</strong><small>$${number(row.close_usd)}</small><span class="${changeClass(row.change_pct)}">${pct(row.change_pct)}</span></div>`).join("");
+    target.innerHTML = chips ? `<div class="ticker-marquee"><div class="ticker-set">${chips}</div><div class="ticker-set" aria-hidden="true">${chips}</div></div>` : '<span class="ticker-loading">No latest quotes are available.</span>';
   }
 
   function renderBreadth(rows) {
